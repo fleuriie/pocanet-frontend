@@ -220,39 +220,35 @@ class Routes {
   @Router.post("/message/send/:to/:m")
   async sendMessage(session: SessionDoc, to: string, m: string) {
     const from = Sessioning.getUser(session);
-    const toUser = new ObjectId(to);
-    return await Messaging.sendMessage(from, toUser, m);
+    const toUser = await Authing.getUserByUsername(to);
+    return await Messaging.sendMessage(from, toUser._id, m);
   }
 
   /**
    * Returns all messages from user from to user to as long as the currently active user
    * is one of those two users. Marks all messages as read.
    */
-  @Router.post("/message/read/:from/:to")
-  async readMessage(session: SessionDoc, from: string, to: string) {
-    // check if the user is either the sender or receiver
-    try {
-      Sessioning.isUser(session, from);
-    } catch {
-      Sessioning.isUser(session, to);
-    }
-    const fromUser = new ObjectId(from);
-    const toUser = new ObjectId(to);
-    return await Messaging.readMessages(fromUser, toUser);
+  @Router.post("/message/read/:to")
+  async readMessage(session: SessionDoc, to: string) {
+    const from = Sessioning.getUser(session);
+    const toUser = await Authing.getUserByUsername(to);
+    return await Messaging.readMessages(from, toUser._id);
   }
 
   @Router.post("/message/block/:user")
   async blockUser(session: SessionDoc, user: string) {
     const from = Sessioning.getUser(session);
-    const to = new ObjectId(user);
-    return await Messaging.blockUser(from, to);
+    const toOid = await Authing.idsToUsernames([new ObjectId(user)]);
+    const toUser = new ObjectId(toOid[0]);
+    return await Messaging.blockUser(from, toUser);
   }
 
   @Router.post("/message/unblock/:user")
   async unblockUser(session: SessionDoc, user: string) {
     const from = Sessioning.getUser(session);
-    const to = new ObjectId(user);
-    return await Messaging.unblockUser(from, to);
+    const toOid = await Authing.idsToUsernames([new ObjectId(user)]);
+    const toUser = new ObjectId(toOid[0]);
+    return await Messaging.unblockUser(from, toUser);
   }
 
   /**

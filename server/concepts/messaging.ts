@@ -7,10 +7,10 @@ export interface BlockDoc extends BaseDoc {
     blocked: string[];
 }
 
-export interface MessagingDoc extends BaseDoc {
+export interface MessageDoc extends BaseDoc {
     sender: ObjectId;
     receiver: ObjectId;
-    messages: string[];
+    message: string;
     read: boolean;
 }
 
@@ -19,13 +19,13 @@ export interface MessagingDoc extends BaseDoc {
  */
 export default class MessagingConcept {
     public readonly blockData: DocCollection<BlockDoc>;
-    public readonly messageData: DocCollection<MessagingDoc>;
+    public readonly messageData: DocCollection<MessageDoc>;
 
     /**
      * Make an instance of Messaging.
      */
     constructor(collectionName: string) {
-        this.messageData = new DocCollection<MessagingDoc>(collectionName);
+        this.messageData = new DocCollection<MessageDoc>(collectionName);
         this.blockData = new DocCollection<BlockDoc>(collectionName);
         this.messageData.collection.createIndex({ sender: 1 });
         this.messageData.collection.createIndex({ receiver: 1 });
@@ -35,24 +35,22 @@ export default class MessagingConcept {
     async sendMessage(sender: ObjectId, receiver: ObjectId, message: string) {
         await this.assertNotBlocked(sender, receiver);
         await this.assertNotBlocked(receiver, sender);
-        if (!await this.messageData.readOne({ sender, receiver })) {
-            await this.createMessageData(sender, receiver);
-        }
-        return await this.messageData.collection.updateOne(
-            { sender, receiver },
-            { $push: { messages: message }, $set: { read: false } }
-        );
+        await this.messageData.createOne({ sender, receiver, message, read: false });
+        return { msg: "Message sent!" };
     }
 
-    async readMessages(sender: ObjectId, receiver: ObjectId) {
-        if (!await this.messageData.readOne({ sender, receiver })) {
+    async readMessages(user1: ObjectId, user2: ObjectId) {
+        if (!await this.messageData.readOne({ sender: { $in: [ user1, user2 ] },
+            receiver: { $in: [ user1, user2 ] } })) {
             throw new NotFoundError("No messages to read!");
         }
-        await this.messageData.collection.updateOne(
-            { sender, receiver },
+        await this.messageData.collection.updateMany(
+            { sender: { $in: [ user1, user2 ] },
+              receiver: { $in: [ user1, user2 ] } },
             { $set: { read: true } }
         );
-        return await this.messageData.readOne({ sender, receiver });
+        return await this.messageData.readMany({ sender: { $in: [ user1, user2 ] },
+            receiver: { $in: [ user1, user2 ] } });
     }
 
     async blockUser(user: ObjectId, recipient: ObjectId) {
@@ -93,10 +91,6 @@ export default class MessagingConcept {
         if (!userBlockData.blocked.includes(recipient.toString())) {
             throw new Error("User is not blocked!");
         }
-    }
-
-    private async createMessageData(sender: ObjectId, receiver: ObjectId) {
-        return await this.messageData.createOne({ sender, receiver, messages: [], read: false });
     }
 
     private async createBlockData(user: ObjectId) {
