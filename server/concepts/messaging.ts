@@ -53,6 +53,27 @@ export default class MessagingConcept {
             receiver: { $in: [ user1, user2 ] } });
     }
 
+    /**
+     * Gets a list of all users the user has sent messages to or received messages from.
+     */
+    async getAllUsers(user: ObjectId) {
+        const users = new Array<ObjectId>();
+        // make sure the read entries don't have block data
+
+        const messages = await this.messageData.readMany({ $or: [ { sender: user }, { receiver: user } ], blocked: { $exists: false } },);
+        const added = new Array<string>();
+        for (const message of messages) {
+            if (message.sender.toString() === user.toString() && !added.includes(message.receiver.toString())) {
+                added.push(message.receiver.toString());
+                users.push(message.receiver);
+            } else if (!users.includes(message.sender) && !added.includes(message.sender.toString())) {
+                added.push(message.sender.toString());
+                users.push(message.sender);
+            }
+        }
+        return users;
+    }
+
     async blockUser(user: ObjectId, recipient: ObjectId) {
         await this.assertNotBlocked(user, recipient);
         await this.blockData.collection.updateOne(

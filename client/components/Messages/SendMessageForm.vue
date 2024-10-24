@@ -1,13 +1,9 @@
 <script setup lang="ts">
-import router from "@/router";
-import { useUserStore } from "@/stores/user";
 import { useMessageStore } from "@/stores/message";
 import { ref } from "vue";
 
-const username = ref("");
 const recipient = ref("");
 const message = ref("");
-const { createUser, loginUser, updateSession } = useUserStore();
 const { sendMessage, fetchMessages } = useMessageStore();
 
 async function send() {

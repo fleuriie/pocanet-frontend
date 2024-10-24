@@ -251,6 +251,13 @@ class Routes {
     return await Messaging.unblockUser(from, toUser);
   }
 
+  @Router.get("/message/recent")
+  async getRecentlyMessagedUsers(session: SessionDoc) {
+    const user = Sessioning.getUser(session);
+    const userList = await Messaging.getAllUsers(user);
+    return await Authing.idsToUsernames(userList);
+  }
+
   /**
    * Leaves a review from the currently active user to the user user with a numerical rating
    * and optional textual feedback.

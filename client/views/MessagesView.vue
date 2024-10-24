@@ -1,9 +1,8 @@
 <script setup lang="ts">
-import router from "@/router";
-import { useUserStore } from "@/stores/user";
+import MessageListComponent from "@/components/Messages/MessageListComponent.vue";
 import { useMessageStore } from "@/stores/message";
+import { useUserStore } from "@/stores/user";
 import { storeToRefs } from "pinia";
-import SendMessageForm from "@/components/Messages/SendMessageForm.vue";
 
 const { currentUsername } = storeToRefs(useUserStore());
 const { currentMessages } = storeToRefs(useMessageStore());
@@ -13,6 +12,6 @@ const { currentMessages } = storeToRefs(useMessageStore());
 <template>
     <main class="column">
         <h1>Messages for {{ currentUsername }}</h1>
-        <SendMessageForm />
+        <MessageListComponent />
     </main>
 </template>
