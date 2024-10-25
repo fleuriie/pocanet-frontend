@@ -21,7 +21,7 @@ const deletePhotocard = async () => {
 
 async function getPhotocardOwner() {
     const photocardTags = props.photocard.tags;
-    const ownerTag = photocardTags.find(tag: string => tag.startsWith("owner:"));
+    const ownerTag = photocardTags.find((tag: string) => tag.startsWith("owner:"));
     if (ownerTag) {
         const username = ownerTag.split(":")[1];
         photocardOwner.value = username;
