@@ -35,7 +35,7 @@ async function getMessages(username: string) {
     catch (_) {
         return;
     }
-    messages.value = messageResults.sort((a, b) => {
+    messages.value = messageResults.sort((a: any, b: any) => {
         return new Date(a.dateCreated).getTime() - new Date(b.dateCreated).getTime();
     }).reverse();
 }

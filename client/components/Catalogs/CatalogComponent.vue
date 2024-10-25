@@ -64,7 +64,7 @@ onBeforeMount(async () => {
         <AddPhotocardForm @refreshPhotocards="getPhotocards" />
     </div>
     <div class="row">
-        <h2 v-if="!searchTags.value">Photocard Collection:</h2>
+        <h2 v-if="!searchTags">Photocard Collection:</h2>
         <h2 v-else>Photocards matching the tags {{ searchTags.split(",") }}:</h2>
         <SearchPhotocardForm @getPhotocardsByTag="getPhotocards" />
     </div>
