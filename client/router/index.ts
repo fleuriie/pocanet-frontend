@@ -6,7 +6,9 @@ import HomeView from "../views/HomeView.vue";
 import LoginView from "../views/LoginView.vue";
 import MessagesView from "../views/MessagesView.vue";
 import NotFoundView from "../views/NotFoundView.vue";
+import ProfileView from "../views/ProfileView.vue";
 import SettingView from "../views/SettingView.vue";
+import SystemCatalogView from "../views/SystemCatalogView.vue";
 
 const router = createRouter({
   history: createWebHistory(),
@@ -15,6 +17,11 @@ const router = createRouter({
       path: "/",
       name: "Home",
       component: HomeView,
+    },
+    {
+      path: "/catalog",
+      name: "View All Photocards",
+      component: SystemCatalogView,
     },
     {
       path: "/setting",
@@ -39,6 +46,12 @@ const router = createRouter({
       name: "Messages",
       component: MessagesView,
       meta: { requiresAuth: true },
+    },
+    {
+      path: "/profile/:username",
+      name: "Profile",
+      component: ProfileView,
+      meta: { requiresAuth: false },
     },
     {
       path: "/:catchAll(.*)",

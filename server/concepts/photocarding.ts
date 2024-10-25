@@ -4,6 +4,7 @@ import { NotAllowedError, NotFoundError } from "./errors";
 
 export interface PhotocardDoc extends BaseDoc {
     tags: string[];
+    photocardUrl: string;
 }
 
 
@@ -24,9 +25,9 @@ export default class PhotocardingConcept {
     /**
      * Adding a new photocard to the system, defined by its tags.
      */
-    async addPhotocard(tags: string[]) {
+    async addPhotocard(tags: string[], photocardUrl: string) {
         await this.assertPhotocardNotExists(tags);
-        const _id = await this.photocards.createOne({ tags });
+        const _id = await this.photocards.createOne({ tags, photocardUrl });
         return { msg: "Photocard added successfully!", id: _id };
     }
 
@@ -50,7 +51,7 @@ export default class PhotocardingConcept {
         }
         var tags = orig.tags;
         tags.push(newTag);
-        return await this.addPhotocard(tags);
+        return await this.addPhotocard(tags, orig.photocardUrl);
     }
 
     async addTag(_id: ObjectId, newTag: string) {

@@ -5,23 +5,39 @@ import { storeToRefs } from "pinia";
 import { onBeforeMount, ref } from "vue";
 import MessageComponent from "./MessageComponent.vue";
 import MessageUserListComponent from "./MessageUserListComponent.vue";
+import ReplyMessageForm from "./ReplyMessageForm.vue";
 import SendMessageForm from "./SendMessageForm.vue";
 
-const { isLoggedIn } = storeToRefs(useUserStore());
+const { isLoggedIn, currentUsername } = storeToRefs(useUserStore());
 
 const loaded = ref(false);
 let messages = ref<Array<Record<string, string>>>([]);
 let users = ref(Array<string>);
+let userToMessage = ref('');
+let currentUserId = ref('');
+let isMessagingUser = ref(false);
+
+async function getCurrentUserId(username: string) {
+    const currentUserInfo = await fetchy(`/api/users/${username}`, "GET");
+    currentUserId.value = currentUserInfo._id;
+}
 
 async function getMessages(username: string) {
+    userToMessage.value = username;
+    if (!userToMessage.value) {
+        return;
+    }
+    isMessagingUser.value = true;
     let messageResults;
     try {
-        messageResults = await fetchy(`/api/message/read/${username}`, "POST");
+        messageResults = await fetchy(`/api/message/read/${userToMessage.value}`, "POST");
     }
     catch (_) {
         return;
     }
-    messages.value = messageResults;
+    messages.value = messageResults.sort((a, b) => {
+        return new Date(a.dateCreated).getTime() - new Date(b.dateCreated).getTime();
+    }).reverse();
 }
 
 async function getRecentUsers() {
@@ -36,60 +52,73 @@ async function getRecentUsers() {
 }
 
 onBeforeMount(async () => {
-  await getRecentUsers();
-  await getMessages(users.value[0]);
-  loaded.value = true;
+    await getCurrentUserId(currentUsername.value);
+    await getRecentUsers();
+    await getMessages(userToMessage.value);
+    loaded.value = true;
 });
 </script>
 
 <template>
-  <section v-if="isLoggedIn">
-    <h2>Send a message: </h2>
-    <SendMessageForm />
-    <div>
-        <MessageUserListComponent :users="users" @user-clicked="getMessages" />
-    </div>
-    <section class="messages" v-if="loaded && messages">
-        <article v-for="message in messages" :key="message._id">
-            <MessageComponent :message="message" @refreshMessages="getMessages"/>
-        </article>
+    <h2>Send a new message: </h2>
+    <SendMessageForm @refreshMessages="getMessages" />
+    <section class="messages-container" v-if="isLoggedIn">
+        <div>
+            <MessageUserListComponent :users="users" @user-clicked="getMessages" />
+        </div>
+        <div class="current-messages" v-if="loaded && isMessagingUser">
+            <section class="messages">
+                <div v-for="message in messages">
+                    <MessageComponent :message="message" :currentUserId="currentUserId" />
+                </div>
+            </section>
+            <ReplyMessageForm :recipient="userToMessage" @refreshMessages="getMessages" />
+        </div>
+        <p class="information" v-else-if="loaded">You are not currently messaging a user!</p>
+        <p class="information" v-else>Loading...</p>
     </section>
-  </section>
-  <p v-else-if="loaded">No messages found</p>
-  <p v-else>Loading...</p>
 </template>
 
 <style scoped>
 section {
-  display: flex;
-  flex-direction: column;
-  gap: 1em;
+    display: flex;
+    flex-direction: column;
+    gap: 1em;
 }
 
-section,
-p,
 .row {
-  margin: 0 auto;
-  max-width: 60em;
-}
-
-article {
-  background-color: var(--base-bg);
-  border-radius: 1em;
-  display: flex;
-  flex-direction: column;
-  gap: 0.5em;
-  padding: 1em;
+    margin: 0 auto;
+    max-width: 60em;
 }
 
 .messages {
-  padding: 1em;
+    border-radius: 1em;
+    display: flex;
+    flex-direction: column;
+    margin: 1em;
+    gap: 0.5em;
+    padding: 1em;
+    max-height: 200px;
+    overflow-y: auto;
+    flex-direction: column-reverse;
+}
+
+.messages-container {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
 }
 
 .row {
-  display: flex;
-  justify-content: space-between;
-  margin: 0 auto;
-  max-width: 60em;
+    display: flex;
+    justify-content: space-between;
+    margin: 0 auto;
+    max-width: 60em;
+}
+
+.information {
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 </style>

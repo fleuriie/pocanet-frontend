@@ -1,26 +1,16 @@
 <script setup lang="ts">
-import { useUserStore } from "@/stores/user";
 import { formatDate } from "@/utils/formatDate";
-import { storeToRefs } from "pinia";
-import { computed } from "vue";
 
+const props = defineProps(["message", "currentUserId"]);
 
-const { currentUsername } = storeToRefs(useUserStore());
-
-const isCurrentUser = computed(() => props.message.sender === currentUsername.value);
-const props = defineProps(["message"]);
-const emit = defineEmits(["refreshMessages"]);
+const isUserSender = props.message.sender === props.currentUserId;
 
 </script>
 
 <template>
-    <div :class="['message-container', isCurrentUser ? 'current-user' : 'other-user']">
-        <p :class="['message-bubble', isCurrentUser ? 'blue-bubble' : 'gray-bubble']">{{ props.message.message }}</p>
-        <div class="base">
-            <article class="timestamp">
-                <p>Sent: {{ formatDate(props.message.dateCreated) }}</p>
-            </article>
-        </div>
+    <div :class="['message-container', isUserSender ? 'current-user' : 'other-user']">
+        <p :class="['message-bubble', isUserSender ? 'blue-bubble' : 'gray-bubble']">{{ props.message.message }}</p>
+        <p class="timestamp">Sent {{ formatDate(props.message.dateCreated) }}</p>
     </div>
 </template>
 
@@ -28,7 +18,6 @@ const emit = defineEmits(["refreshMessages"]);
 .message-container {
     display: flex;
     flex-direction: column;
-    margin: 0.5em 0;
 }
 
 .current-user {
@@ -41,8 +30,9 @@ const emit = defineEmits(["refreshMessages"]);
 
 .message-bubble {
     padding: 0.5em 1em;
+    margin: 0;
     border-radius: 10px;
-    max-width: 60%;
+    max-width: 80%;
     word-wrap: break-word;
 }
 
@@ -58,18 +48,9 @@ const emit = defineEmits(["refreshMessages"]);
 
 .timestamp {
     display: flex;
-    justify-content: flex-end;
-    font-size: 0.9em;
+    font-size: 0.5em;
     font-style: italic;
-}
-
-.base {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-.base article:only-child {
-    margin-left: auto;
+    margin: 0.1;
+    padding: 0;
 }
 </style>

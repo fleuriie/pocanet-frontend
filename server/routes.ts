@@ -71,15 +71,15 @@ class Routes {
   // RESTFUL API ADDITIONS BEGIN HERE
   
   @Router.post("/photocard/add/:tags")
-  async systemAddPhotocard(tags: string) {
+  async systemAddPhotocard(tags: string, photocardUrl: string) {
     const tagList = tags.split(',');
     tagList.push("System");
-    const photocard = await Photocarding.addPhotocard(tagList);
+    const photocard = await Photocarding.addPhotocard(tagList, photocardUrl);
     return await Cataloging.systemAddItem(photocard.id);
   }
 
-  @Router.post("/photocard/:id/delete")
-  async systemDeletePhotocard(id: string) {
+  @Router.delete("/photocard/delete/:id")
+  async deletePhotocard(id: string) {
     const oid = new ObjectId(id);
     await Photocarding.removePhotocard(oid);
     return await Cataloging.systemDeleteItem(oid);
@@ -97,27 +97,17 @@ class Routes {
     return await Photocarding.deleteTag(oid, tag);
   }
 
-  @Router.get("/catalog/system")
-  async viewSystemCatalog() {
-    return await Photocarding.searchTags(["System"]);
+  @Router.get("/catalog/:owner")
+  async viewCatalog(owner: string) {
+    if(owner === "System")  return await Photocarding.searchTags(["System"]);
+    else return await Photocarding.searchTags([`owner:${owner}`]);
   }
 
-  @Router.get("/catalog/:user")
-  async viewUserCollection(user: string) {
-    return await Photocarding.searchTags([`owner:${user}`]);
-  }
-
-  @Router.get("/catalog/system/search/:tags")
-  async searchSystemCatalog(tags: string) {
+  @Router.get("/catalog/:owner/:tags")
+  async searchCatalog(owner: string, tags: string) {
     const tagList = tags.split(',');
-    tagList.push("System");
-    return await Photocarding.searchTags(tagList);
-  }
-
-  @Router.get("/catalog/:username/search/:tags")
-  async searchUserCollection(username: string, tags: string) {
-    const tagList = tags.split(',');
-    tagList.push(`owner:${username}`);
+    if(owner === "System")  tagList.push("System");
+    else tagList.push(`owner:${owner}`);
     return await Photocarding.searchTags(tagList);
   }
 
@@ -136,18 +126,6 @@ class Routes {
     await Photocarding.deleteTag(dupe.id, "System");
     await Cataloging.userAddItem(currentUsername[0], dupe.id);
     return { msg: 'Photocard successfully added to collection!' };
-  }
-
-  @Router.post("/catalog/edit/remove/:photocard")
-  async userDeletePhotocard(session: SessionDoc, user: string, photocard: string) {
-    const currentUser = Sessioning.getUser(session);
-    const oid = new ObjectId(photocard);
-    const currentUsername = await Authing.idsToUsernames([currentUser]);
-    // check to make sure the current user is trying to modify their own photocard
-    await Photocarding.assertPhotocardHasTag(oid, `owner:${currentUsername[0]}`);
-    await Photocarding.removePhotocard(oid);
-    await Cataloging.userDeleteItem(currentUsername[0], oid);
-    return { msg: 'Photocard successfully removed from collection!' };
   }
 
   @Router.post("/catalog/edit/add/:photocard/:tag")

@@ -6,9 +6,12 @@ const recipient = ref("");
 const message = ref("");
 const { sendMessage, fetchMessages } = useMessageStore();
 
+const emit = defineEmits(["refreshMessages"]);
+
 async function send() {
     await sendMessage(recipient.value, message.value);
     await fetchMessages(recipient.value);
+    emit("refreshMessages", recipient.value);
 }
 </script>
 
