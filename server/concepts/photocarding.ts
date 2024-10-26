@@ -131,6 +131,9 @@ export default class PhotocardingConcept {
         if (tag.startsWith("owner:")) {
             throw new NotAllowedError("Cannot try to mark a photocard as owned by a user!");
         }
+        if (tag.includes(" ")) {
+            throw new NotAllowedError("Tags cannot contain spaces!");
+        }
     }
   }
 

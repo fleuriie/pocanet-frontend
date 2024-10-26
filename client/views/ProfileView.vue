@@ -6,6 +6,8 @@ import { onBeforeMount, ref } from "vue";
 
 import CatalogComponent from '@/components/Catalogs/CatalogComponent.vue';
 
+import AllReviewsComponent from '@/components/Reviews/AllReviewsComponent.vue';
+
 import { fetchy } from "../utils/fetchy";
 
 const { currentUsername, isLoggedIn } = storeToRefs(useUserStore());
@@ -29,7 +31,8 @@ onBeforeMount(async () => {
             <h1 v-else>{{ username }}'s Profile Page!</h1>
         </section>
         <div>
-            <CatalogComponent :owner="username" />
+            <AllReviewsComponent :reviewOfUser="username" />
+            <CatalogComponent :owner="username" :isAllPhotocards="false" />
         </div>
     </main>
 </template>

@@ -91,7 +91,7 @@ class Routes {
     return await Photocarding.addTag(oid, tag)
   }
 
-  @Router.post("/photocard/:id/tags/delete/:tag")
+  @Router.post("/photocard/:id/tags/remove/:tag")
   async systemDeleteTag(id: string, tag: string) {
     const oid = new ObjectId(id);
     return await Photocarding.deleteTag(oid, tag);
@@ -181,9 +181,9 @@ class Routes {
     const user = Sessioning.getUser(session);
     await Discovering.createUserDiscovery(user);
     const recommended = await Discovering.recommend(user);
-    const averageRating = await Reviewing.getAverageRating(recommended.owner)
     const owner = await Authing.idsToUsernames([recommended.owner]);
-    if(averageRating != "No ratings found!" && averageRating < 3) {
+    const averageRating = await Reviewing.getAverageRating(owner[0])
+    if(averageRating > 0 && averageRating < 3) {
       return { msg: 'Photocard recommended, but the owner has a poor rating!', owner: owner[0], photocard: recommended.item };
     }
     else {
@@ -241,31 +241,29 @@ class Routes {
    * and optional textual feedback.
    * 
    * @param session Currently active session.
-   * @param user User to leave a review for.
+   * @param user Username of user to leave a review for.
    * @param rating Numerical rating 1-5 for the user, with 5 being the best.
    * @param review Optional textual feedback for the user.
    */
-  @Router.post("/reviews/leave/:user/:rating/:review")
+  @Router.post("/reviews/leave/:user")
   async leaveFeedback(session: SessionDoc, user: string, rating: number, review?: string) {
     const from = Sessioning.getUser(session);
-    const to = new ObjectId(user);
-    await Reviewing.rateUser(to, from, rating);
+    const fromUsername = await Authing.idsToUsernames([new ObjectId(from)]);
+    await Reviewing.rateUser(user, fromUsername[0], rating);
     if (review) {
-      await Reviewing.reviewUser(to, from, review);
+      await Reviewing.reviewUser(user, fromUsername[0], review);
     }
     return { msg: 'Feedback successfully left!' };
   }
 
-  @Router.get("/reviews/getaverage/:user")
+  @Router.get("/reviews/average/:user")
   async viewAverageRatings(user: string) {
-    const uid = new ObjectId(user);
-    return await Reviewing.getAverageRating(uid);
+    return await Reviewing.getAverageRating(user);
   }
 
-  @Router.get("/reviews/seefeedback/:user")
+  @Router.get("/reviews/:user")
   async viewFeedback(user: string) {
-    const uid = new ObjectId(user);
-    return await Reviewing.getFeedback(uid);
+    return await Reviewing.getAllReviews(user);
   }
 }
 

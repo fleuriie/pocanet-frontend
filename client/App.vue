@@ -33,22 +33,22 @@ onBeforeMount(async () => {
       <ul>
         <li>
           <RouterLink :to="{ name: 'View All Photocards' }"
-            :class="{ underline: currentRouteName == 'View All Photocards' }"> View All Photocards </RouterLink>
+            :class="{ selected: currentRouteName == 'View All Photocards' }"> View All Photocards </RouterLink>
         </li>
         <li v-if="isLoggedIn">
-          <RouterLink :to="{ name: 'Settings' }" :class="{ underline: currentRouteName == 'Settings' }"> Settings
+          <RouterLink :to="{ name: 'Settings' }" :class="{ selected: currentRouteName == 'Settings' }"> Settings
           </RouterLink>
         </li>
         <li v-else>
-          <RouterLink :to="{ name: 'Login' }" :class="{ underline: currentRouteName == 'Login' }"> Login </RouterLink>
+          <RouterLink :to="{ name: 'Login' }" :class="{ selected: currentRouteName == 'Login' }"> Login </RouterLink>
         </li>
         <li v-if="isLoggedIn">
-          <RouterLink :to="{ name: 'Messages' }" :class="{ underline: currentRouteName == 'Messages' }"> Messages
+          <RouterLink :to="{ name: 'Messages' }" :class="{ selected: currentRouteName == 'Messages' }"> Messages
           </RouterLink>
         </li>
         <li v-if="isLoggedIn">
           <RouterLink :to="{ name: 'Profile', params: { username: userStore.currentUsername } }"
-            :class="{ underline: currentRouteName == 'Profile' }"> Profile
+            :class="{ selected: currentRouteName == 'Profile' }"> Profile
           </RouterLink>
         </li>
       </ul>
@@ -64,43 +64,67 @@ onBeforeMount(async () => {
 @import "./assets/toast.css";
 
 nav {
-  padding: 1em 2em;
-  background-color: lightgray;
+  padding: 0 .5em;
+  background-color: var(--background);
+  border-bottom: 3px solid var(--primary);
   display: flex;
   align-items: center;
+  margin: 0;
 }
 
 h1 {
-  font-size: 2em;
+  font-size: 1.5em;
   margin: 0;
+  padding: 0;
 }
 
 .title {
   display: flex;
   align-items: center;
   gap: 0.5em;
+  margin: 0;
+  padding: 0;
 }
 
 img {
   height: 2em;
+  margin: 0;
+  padding: 0;
 }
 
 a {
   font-size: large;
   color: black;
   text-decoration: none;
+  padding: .5em;
+  margin: 0;
+  min-height: 100%;
 }
 
 ul {
   list-style-type: none;
-  margin-left: auto;
+  margin: 0 0 0 auto;
+  padding: 0;
   display: flex;
   align-items: center;
   flex-direction: row;
   gap: 1em;
+  min-height: 100%;
 }
 
-.underline {
-  text-decoration: underline;
+li {
+  margin: 0;
+  padding: 0;
+  min-height: 100%;
+}
+
+.selected {
+  background-color: var(--primary);
+  min-height: 100%;
+
+}
+
+a:hover {
+  background-color: var(--secondary);
 }
 </style>

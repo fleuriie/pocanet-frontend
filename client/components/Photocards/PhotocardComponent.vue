@@ -9,17 +9,38 @@ const emit = defineEmits(["editPhotocard", "refreshPhotocards", "duplicatePhotoc
 const { isLoggedIn, currentUsername } = storeToRefs(useUserStore());
 let photocardOwner = ref('');
 let loaded = ref(false);
+let availableStatus = ref(false);
 
 const deletePhotocard = async () => {
     try {
-        await fetchy(`/api/photocard/delete/:id`, "DELETE");
+        await fetchy(`/api/photocard/delete/${props.photocard._id}`, "DELETE");
     } catch {
         return;
     }
     emit("refreshPhotocards");
 };
 
-async function getPhotocardOwner() {
+const markAsAvailable = async () => {
+    try {
+        await fetchy(`/api/catalog/edit/avail/${props.photocard._id}`, "POST");
+    } catch {
+        return;
+    }
+    availableStatus.value = true;
+    emit("refreshPhotocards");
+};
+
+const markAsUnavailable = async () => {
+    try {
+        await fetchy(`/api/catalog/edit/unavail/${props.photocard._id}`, "POST");
+    } catch {
+        return;
+    }
+    availableStatus.value = false;
+    emit("refreshPhotocards");
+};
+
+async function getPhotocardInfo() {
     const photocardTags = props.photocard.tags;
     const ownerTag = photocardTags.find((tag: string) => tag.startsWith("owner:"));
     if (ownerTag) {
@@ -29,10 +50,10 @@ async function getPhotocardOwner() {
     else {
         photocardOwner.value = "System";
     }
+    availableStatus.value = photocardTags.includes("Available");
 }
-
 onBeforeMount(async () => {
-    await getPhotocardOwner();
+    await getPhotocardInfo();
     loaded.value = true;
 });
 </script>
@@ -44,6 +65,10 @@ onBeforeMount(async () => {
             <li><button class="btn-small pure-button" @click="emit('editPhotocard', props.photocard._id)">Edit</button>
             </li>
             <li><button class="button-error btn-small pure-button" @click="deletePhotocard">Delete</button></li>
+            <li v-if="availableStatus"><button class="btn-small pure-button" @click="markAsUnavailable">Mark As
+                    Unavailable</button></li>
+            <li v-else><button class="btn-small pure-button" @click="markAsAvailable">Mark As Available</button>
+            </li>
         </menu>
         <menu v-else-if="isLoggedIn">
             <li><button class="btn-small pure-button" @click="emit('duplicatePhotocard', props.photocard._id)">Add to
@@ -62,6 +87,7 @@ menu {
     list-style-type: none;
     display: flex;
     flex-direction: row;
+    flex-wrap: wrap;
     gap: 1em;
     padding: 0;
     margin: 0;
@@ -71,6 +97,7 @@ menu {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    max-width: 7em;
 }
 
 .base article:only-child {

@@ -3,33 +3,69 @@ import { ref } from "vue";
 import { fetchy } from "../../utils/fetchy";
 import { formatDate } from "../../utils/formatDate";
 
-const props = defineProps(["post"]);
-const content = ref(props.post.content);
-const emit = defineEmits(["editPost", "refreshPosts"]);
+const props = defineProps(["photocard", "owner"]);
+const emit = defineEmits(["editPhotocard", "refreshPhotocards"]);
+const addedTag = ref("");
+const removedTag = ref("");
 
-const editPost = async (content: string) => {
-    try {
-        await fetchy(`/api/posts/${props.post._id}`, "PATCH", { body: { content: content } });
-    } catch (e) {
-        return;
+async function editTags() {
+    if (addedTag.value) {
+        if (props.owner === "System") {
+            try {
+                await fetchy(`/api/${props.photocard._id}/tags/add/${addedTag.value}`, "POST");
+            }
+            catch (e) {
+                return;
+            }
+        }
+        else {
+            try {
+                await fetchy(`/api/catalog/edit/add/${props.photocard._id}/${addedTag.value}`, "POST");
+            }
+            catch (e) {
+                return;
+            }
+        }
     }
-    emit("editPost");
-    emit("refreshPosts");
+    if (removedTag.value) {
+        console.log(removedTag.value)
+        if (props.owner === "System") {
+            try {
+                await fetchy(`/api/${photocard._id}/tags/delete/${props.removedTag.value}`, "POST");
+            }
+            catch (e) {
+                return;
+            }
+        }
+        else {
+            try {
+                await fetchy(`/api/catalog/edit/remove/${props.photocard._id}/${removedTag.value}`, "POST");
+            }
+            catch (e) {
+                return;
+            }
+        }
+    }
+    emit("editPhotocard");
+    emit("refreshPhotocards");
+    emptyForm();
+};
+const emptyForm = () => {
+    addedTag.value = "";
+    removedTag.value = "";
 };
 </script>
 
 <template>
-    <form @submit.prevent="editPost(content)">
-        <p class="author">{{ props.post.author }}</p>
-        <textarea id="content" v-model="content" placeholder="Create a post!" required> </textarea>
+    <form @submit.prevent="editTags">
+        <p>Photocard currently has tags: {{ props.photocard.tags.filter(tag => !tag.startsWith("owner:")) }}</p>
+        <input type="text" v-model="addedTag" placeholder="Add a tag?" />
+        <input type="text" v-model="removedTag" placeholder="Remove a tag?" />
         <div class="base">
             <menu>
                 <li><button class="btn-small pure-button-primary pure-button" type="submit">Save</button></li>
-                <li><button class="btn-small pure-button" @click="emit('editPost')">Cancel</button></li>
+                <li><button class="btn-small pure-button" @click="emit('editPhotocard')">Cancel</button></li>
             </menu>
-            <p v-if="props.post.dateCreated !== props.post.dateUpdated" class="timestamp">Edited on: {{
-                formatDate(props.post.dateUpdated) }}</p>
-            <p v-else class="timestamp">Created on: {{ formatDate(props.post.dateCreated) }}</p>
         </div>
     </form>
 </template>
@@ -40,12 +76,14 @@ form {
     display: flex;
     flex-direction: column;
     gap: 0.5em;
+    max-width: 15em;
+    flex-wrap: wrap;
 }
 
 textarea {
     font-family: inherit;
     font-size: inherit;
-    height: 6em;
+    height: 1.5em;
     border-radius: 4px;
     resize: none;
 }
@@ -54,10 +92,6 @@ p {
     margin: 0em;
 }
 
-.author {
-    font-weight: bold;
-    font-size: 1.2em;
-}
 
 menu {
     list-style-type: none;

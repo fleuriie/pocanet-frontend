@@ -20,7 +20,7 @@ const adminUsername = "System";
             <h1>All Photocards</h1>
         </section>
         <div>
-            <CatalogComponent :owner="adminUsername" />
+            <CatalogComponent :owner="adminUsername" :isAllPhotocards="true" />
         </div>
     </main>
 </template>

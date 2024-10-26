@@ -1,8 +1,12 @@
 /* Add some global styles here! */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap');
 
 :root {
-  --red: rgb(208, 67, 12);
-  --base-bg: #f1f3f5;
+  --text: #060704;
+  --background: #fbfcfa;
+  --primary: #8ba36b;
+  --secondary: #acbad0;
+  --accent: #83b6bb;
 }
 
 button.btn-small {
@@ -29,4 +33,10 @@ a.button {
   justify-content: center;
   align-items: center;
   gap: 1em;
+}
+
+body {
+  background-color: var(--background);
+  font-family: 'Inter', sans-serif;
+
 }

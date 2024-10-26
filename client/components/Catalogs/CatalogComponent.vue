@@ -11,7 +11,7 @@ import { onBeforeMount, ref } from "vue";
 
 const { isLoggedIn, currentUsername } = storeToRefs(useUserStore());
 
-const props = defineProps(["owner"]);
+const props = defineProps(["owner", "isAllPhotocards"]);
 const loaded = ref(false);
 const adminUsername = "System";
 const isAdmin = ref(currentUsername.value === adminUsername);
@@ -23,6 +23,7 @@ let searchTags = ref("");
 async function getPhotocards(tags?: string) {
     let photocardResults;
     if (tags) {
+        tags = tags.replace(/\s+/g, ",");
         try {
             photocardResults = await fetchy(`/api/catalog/${props.owner}/${tags}`, "GET");
         } catch (_) {
@@ -60,24 +61,28 @@ onBeforeMount(async () => {
 </script>
 
 <template>
-    <div v-if="isAdmin">
-        <AddPhotocardForm @refreshPhotocards="getPhotocards" />
-    </div>
-    <div class="row">
-        <h2 v-if="!searchTags">Photocard Collection:</h2>
-        <h2 v-else>Photocards matching the tags {{ searchTags.split(",") }}:</h2>
+    <div class="catalog-container">
+        <div v-if="isAdmin && props.isAllPhotocards">
+            <AddPhotocardForm @refreshPhotocards="getPhotocards" />
+        </div>
         <SearchPhotocardForm @getPhotocardsByTag="getPhotocards" />
+        <div class="row">
+            <h2 v-if="!searchTags && !props.isAllPhotocards">{{ props.owner }}'s Photocard Collection!</h2>
+            <h2 v-else-if="searchTags && props.isAllPhotocards">Photocards matching the tags {{ searchTags.split(",")
+                }}:</h2>
+        </div>
+        <section class="photocards" v-if="loaded && photocards.length !== 0">
+            <article v-for="photocard in photocards" :key="photocard._id">
+                <PhotocardComponent v-if="editing !== photocard._id" :photocard="photocard"
+                    @refreshPhotocards="getPhotocards" @editPhotocard="updateEditing"
+                    @duplicatePhotocard="duplicatePhotocard" />
+                <EditPhotocardForm v-else :photocard="photocard" @refreshPhotocards="getPhotocards"
+                    @editPhotocard="updateEditing" />
+            </article>
+        </section>
+        <p v-else-if="loaded">No photocards found</p>
+        <p v-else>Loading...</p>
     </div>
-    <section class="photocards" v-if="loaded && photocards.length !== 0">
-        <article v-for="photocard in photocards" :key="photocard._id">
-            <PhotocardComponent v-if="editing !== photocard._id" :photocard="photocard"
-                @refreshPhotocard="getPhotocards" @editPost="updateEditing" @duplicatePhotocard="duplicatePhotocard" />
-            <EditPhotocardForm v-else :photocard="photocard" @refreshPhotocards="getPhotocards"
-                @editPhotocard="updateEditing" />
-        </article>
-    </section>
-    <p v-else-if="loaded">No photocards found</p>
-    <p v-else>Loading...</p>
 </template>
 
 <style scoped>
@@ -91,7 +96,13 @@ section,
 p,
 .row {
     margin: 0 auto;
-    max-width: 60em;
+    max-width: 50em;
+}
+
+.catalog-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
 }
 
 article {

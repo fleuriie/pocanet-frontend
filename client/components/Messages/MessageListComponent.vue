@@ -48,7 +48,7 @@ async function getRecentUsers() {
     catch (_) {
         return;
     }
-    users.value = userResults;
+    users.value = userResults.filter(user => user !== currentUsername.value);
 }
 
 onBeforeMount(async () => {
@@ -61,12 +61,11 @@ onBeforeMount(async () => {
 
 <template>
     <h2>Send a new message: </h2>
-    <SendMessageForm @refreshMessages="getMessages" />
+    <SendMessageForm @refreshMessages="getMessages" @refreshUsers="getRecentUsers" />
     <section class="messages-container" v-if="isLoggedIn">
-        <div>
-            <MessageUserListComponent :users="users" @user-clicked="getMessages" />
-        </div>
+        <MessageUserListComponent :users="users" @user-clicked="getMessages" />
         <div class="current-messages" v-if="loaded && isMessagingUser">
+            <h2>Message History with {{ userToMessage }}</h2>
             <section class="messages">
                 <div v-for="message in messages">
                     <MessageComponent :message="message" :currentUserId="currentUserId" />
@@ -98,12 +97,13 @@ section {
     margin: 1em;
     gap: 0.5em;
     padding: 1em;
-    max-height: 200px;
+    max-height: 300px;
     overflow-y: auto;
     flex-direction: column-reverse;
 }
 
 .messages-container {
+    vertical-align: top;
     display: flex;
     flex-direction: row;
     justify-content: space-between;

@@ -1,18 +1,27 @@
 <script setup lang="ts">
+import { useUserStore } from "@/stores/user";
 import { useMessageStore } from "@/stores/message";
+import { storeToRefs } from "pinia";
 import { ref } from "vue";
 
+const { currentUsername } = storeToRefs(useUserStore());
 const recipient = ref("");
 const message = ref("");
 const { sendMessage, fetchMessages } = useMessageStore();
 
-const emit = defineEmits(["refreshMessages"]);
+const emit = defineEmits(["refreshMessages", "refreshUsers"]);
 
 async function send() {
     await sendMessage(recipient.value, message.value);
-    await fetchMessages(recipient.value);
     emit("refreshMessages", recipient.value);
-}
+    emit("refreshUsers");
+    emptyForm();
+};
+
+const emptyForm = () => {
+    recipient.value = "";
+    message.value = "";
+};
 </script>
 
 <template>
