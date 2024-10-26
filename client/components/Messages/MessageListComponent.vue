@@ -48,7 +48,7 @@ async function getRecentUsers() {
     catch (_) {
         return;
     }
-    users.value = userResults.filter(user => user !== currentUsername.value);
+    users.value = userResults.filter(user: any => user !== currentUsername.value);
 }
 
 onBeforeMount(async () => {

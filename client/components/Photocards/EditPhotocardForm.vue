@@ -31,7 +31,7 @@ async function editTags() {
         console.log(removedTag.value)
         if (props.owner === "System") {
             try {
-                await fetchy(`/api/${photocard._id}/tags/delete/${props.removedTag.value}`, "POST");
+                await fetchy(`/api/${props.photocard._id}/tags/delete/${removedTag.value}`, "POST");
             }
             catch (e) {
                 return;
@@ -58,7 +58,7 @@ const emptyForm = () => {
 
 <template>
     <form @submit.prevent="editTags">
-        <p>Photocard currently has tags: {{ props.photocard.tags.filter(tag => !tag.startsWith("owner:")) }}</p>
+        <p>Photocard currently has tags: {{ props.photocard.tags.filter(tag: any => !tag.startsWith("owner:")) }}</p>
         <input type="text" v-model="addedTag" placeholder="Add a tag?" />
         <input type="text" v-model="removedTag" placeholder="Remove a tag?" />
         <div class="base">
