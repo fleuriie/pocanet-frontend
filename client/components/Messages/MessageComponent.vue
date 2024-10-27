@@ -3,7 +3,7 @@ import { formatDate } from "@/utils/formatDate";
 
 const props = defineProps(["message", "currentUserId"]);
 
-const isUserSender = props.message.sender === props.currentUserId;
+const isUserSender = props.message.sender == props.currentUserId;
 
 </script>
 

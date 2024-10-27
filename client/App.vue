@@ -26,7 +26,7 @@ onBeforeMount(async () => {
       <div class="navbar-title">
         <img src="@/assets/images/photo.png" alt="Pocanet logo" />
         <RouterLink :to="{ name: 'Home' }">
-          <h1>Pocanet</h1>
+          <h1 class="sedgwick-ave-display-regular">POCANET</h1>
         </RouterLink>
       </div>
       <ul class="navbar-links">
@@ -166,4 +166,11 @@ onBeforeMount(async () => {
     padding: 0.5em;
   }
 }
+
+.sedgwick-ave-display-regular {
+  font-family: "Sedgwick Ave Display", cursive;
+  font-weight: 400;
+  font-style: normal;
+}
+
 </style>

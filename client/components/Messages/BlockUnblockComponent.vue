@@ -1,10 +1,6 @@
 <script setup lang="ts">
+import { fetchy } from "@/utils/fetchy";
 import { onBeforeMount, ref } from "vue";
-import { useUserStore } from "@/stores/user";
-import { storeToRefs } from "pinia";
-import { fetchy } from "@/utils/fetchy"
-
-const { isLoggedIn, currentUsername } = storeToRefs(useUserStore());
 
 const props = defineProps(["user"]);
 let isBlocked = ref(false);

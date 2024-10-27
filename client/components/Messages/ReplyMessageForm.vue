@@ -1,14 +1,13 @@
 <script setup lang="ts">
-import { useMessageStore } from "@/stores/message";
+import { fetchy } from "@/utils/fetchy";
 import { ref } from "vue";
 
 let props = defineProps(["recipient"]);
 const message = ref("");
-const { sendMessage } = useMessageStore();
 const emit = defineEmits(["refreshMessages"]);
 
 async function send() {
-    await sendMessage(props.recipient, message.value);
+    await fetchy(`/api/message/send/${props.recipient}/${message.value}`, 'POST');
     emit("refreshMessages", props.recipient);
     emptyForm();
 }

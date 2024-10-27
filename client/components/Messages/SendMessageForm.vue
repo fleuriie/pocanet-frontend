@@ -1,18 +1,14 @@
 <script setup lang="ts">
-import { useUserStore } from "@/stores/user";
-import { useMessageStore } from "@/stores/message";
-import { storeToRefs } from "pinia";
+import { fetchy } from "@/utils/fetchy";
 import { ref } from "vue";
 
-const { currentUsername } = storeToRefs(useUserStore());
 const recipient = ref("");
 const message = ref("");
-const { sendMessage, fetchMessages } = useMessageStore();
 
 const emit = defineEmits(["refreshMessages", "refreshUsers"]);
 
 async function send() {
-    await sendMessage(recipient.value, message.value);
+    await fetchy(`/api/message/send/${recipient.value}/${message.value}`, 'POST');
     emit("refreshMessages", recipient.value);
     emit("refreshUsers");
     emptyForm();
