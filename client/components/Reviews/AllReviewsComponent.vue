@@ -42,7 +42,7 @@ onBeforeMount(async () => {
 </script>
 
 <template>
-    <div class="review-container">
+    <main>
         <div class="row">
             <h2>Reviews for user {{ props.reviewOfUser }} (average {{ Math.round(averageRating * 100) / 100 }}):</h2>
         </div>
@@ -51,13 +51,20 @@ onBeforeMount(async () => {
                 <ReviewComponent :reviewFromUser="review.user" :rating="review.rating" :review="review.review" />
             </article>
         </section>
-        <p v-else-if="loaded">No reviews found for {{ props.reviewOfUser }}! Leave the first one? </p>
-        <p v-else>Loading...</p>
-        <LeaveReviewForm :reviewOfUser="props.reviewOfUser" @refreshRatings="getReviews" />
-    </div>
+        <p v-else-if="loaded">No reviews found for {{ props.reviewOfUser }}!</p>
+        <p v-else-if="props.reviewOfUser !== currentUsername">Loading...</p>
+        <LeaveReviewForm v-if="props.reviewOfUser !== currentUsername" :reviewOfUser="props.reviewOfUser"
+            @refreshRatings="getReviews" />
+    </main>
 </template>
 
 <style scoped>
+main {
+    margin: 0 auto;
+    max-width: 50em;
+    align-items: center;
+}
+
 .reviews {
     display: flex;
     flex-wrap: wrap;
@@ -69,10 +76,6 @@ onBeforeMount(async () => {
     box-sizing: border-box;
 }
 
-.review-container {
-    margin: 0 auto;
-    max-width: 50em;
-}
 
 article {
     background-color: var(--base-bg);
@@ -91,6 +94,6 @@ article {
     display: flex;
     justify-content: space-between;
     margin: 0 auto;
-    max-width: 60em;
+    max-width: 50em;
 }
 </style>

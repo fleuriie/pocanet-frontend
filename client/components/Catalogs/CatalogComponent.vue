@@ -66,6 +66,7 @@ onBeforeMount(async () => {
             <AddPhotocardForm @refreshPhotocards="getPhotocards" />
         </div>
         <SearchPhotocardForm @getPhotocardsByTag="getPhotocards" />
+        <p>Hover over a photocard to see its tags!</p>
         <div class="row">
             <h2 v-if="!searchTags && !props.isAllPhotocards">{{ props.owner }}'s Photocard Collection!</h2>
             <h2 v-else-if="searchTags && props.isAllPhotocards">Photocards matching the tags {{ searchTags.split(",")
@@ -73,7 +74,7 @@ onBeforeMount(async () => {
         </div>
         <section class="photocards" v-if="loaded && photocards.length !== 0">
             <article v-for="photocard in photocards" :key="photocard._id">
-                <PhotocardComponent v-if="editing !== photocard._id" :photocard="photocard"
+                <PhotocardComponent v-if="editing !== photocard._id" :photocard="photocard" :isDiscovery="false"
                     @refreshPhotocards="getPhotocards" @editPhotocard="updateEditing"
                     @duplicatePhotocard="duplicatePhotocard" />
                 <EditPhotocardForm v-else :photocard="photocard" @refreshPhotocards="getPhotocards"
@@ -90,13 +91,9 @@ section {
     display: flex;
     flex-wrap: wrap;
     gap: 1em;
-}
-
-section,
-p,
-.row {
-    margin: 0 auto;
-    max-width: 50em;
+    align-items: center;
+    margin: auto;
+    max-width: 60em;
 }
 
 .catalog-container {
@@ -112,10 +109,12 @@ article {
     flex-direction: column;
     gap: 0.5em;
     padding: 1em;
+    align-items: center;
 }
 
 .photocards {
     padding: 1em;
+    align-items: center;
 }
 
 .row {

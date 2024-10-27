@@ -2,9 +2,9 @@
 import { useUserStore } from "@/stores/user";
 import { storeToRefs } from "pinia";
 import { fetchy } from "../../utils/fetchy";
-import { onBeforeMount, ref } from "vue";
+import { onMounted, ref } from "vue";
 
-const props = defineProps(["photocard"]);
+const props = defineProps(["photocard", "isDiscovery"]);
 const emit = defineEmits(["editPhotocard", "refreshPhotocards", "duplicatePhotocard"]);
 const { isLoggedIn, currentUsername } = storeToRefs(useUserStore());
 let photocardOwner = ref('');
@@ -46,41 +46,99 @@ async function getPhotocardInfo() {
     if (ownerTag) {
         const username = ownerTag.split(":")[1];
         photocardOwner.value = username;
-    }
-    else {
+    } else {
         photocardOwner.value = "System";
     }
     availableStatus.value = photocardTags.includes("Available");
 }
-onBeforeMount(async () => {
+
+onMounted(async () => {
     await getPhotocardInfo();
     loaded.value = true;
 });
 </script>
 
 <template>
-    <img :src="props.photocard.photocardUrl" alt="Photocard Image" />
-    <div class="base">
-        <menu v-if="photocardOwner == currentUsername">
-            <li><button class="btn-small pure-button" @click="emit('editPhotocard', props.photocard._id)">Edit</button>
+    <div class="photocard-container">
+        <img :src="props.photocard.photocardUrl" alt="Photocard Image" />
+        <div class="tags-tooltip">
+            <p>Photocard tagged with:</p>
+            <ul>
+                <li v-for="tag in props.photocard.tags" :key="tag">{{ tag }}</li>
+            </ul>
+        </div>
+    </div>
+    <div v-if="!props.isDiscovery" class="base">
+        <menu v-if="photocardOwner === currentUsername">
+            <li>
+                <button class="btn-small pure-button" @click="emit('editPhotocard', props.photocard._id)">Edit</button>
             </li>
-            <li><button class="button-error btn-small pure-button" @click="deletePhotocard">Delete</button></li>
-            <li v-if="availableStatus"><button class="btn-small pure-button" @click="markAsUnavailable">Mark As
-                    Unavailable</button></li>
-            <li v-else><button class="btn-small pure-button" @click="markAsAvailable">Mark As Available</button>
+            <li>
+                <button class="button-error btn-small pure-button" @click="deletePhotocard">Delete</button>
+            </li>
+            <li v-if="availableStatus">
+                <button class="btn-small pure-button" @click="markAsUnavailable">Mark As Unavailable</button>
+            </li>
+            <li v-else>
+                <button class="btn-small pure-button" @click="markAsAvailable">Mark As Available</button>
             </li>
         </menu>
         <menu v-else-if="isLoggedIn">
-            <li><button class="btn-small pure-button" @click="emit('duplicatePhotocard', props.photocard._id)">Add to
-                    Your Collection</button>
+            <li>
+                <button class="btn-small pure-button" @click="emit('duplicatePhotocard', props.photocard._id)">Add To
+                    Collection</button>
             </li>
         </menu>
     </div>
 </template>
 
 <style scoped>
-p {
-    margin: 0em;
+.photocard-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    margin: auto;
+}
+
+img {
+    width: 10em;
+    overflow: hidden;
+}
+
+.base {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    max-width: 7em;
+    margin: auto;
+}
+
+.tags-tooltip {
+    position: absolute;
+    top: 0;
+    left: 0;
+    background-color: rgba(0, 0, 0, 0.7);
+    color: white;
+    padding: 0.5em;
+    border-radius: 0.5em;
+    display: none;
+}
+
+.photocard-container:hover .tags-tooltip {
+    display: block;
+    max-width: 150px;
+    white-space: normal;
+    word-wrap: break-word;
+}
+
+
+.base {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    max-width: 7em;
 }
 
 menu {
@@ -91,22 +149,32 @@ menu {
     gap: 1em;
     padding: 0;
     margin: 0;
-}
-
-.base {
-    display: flex;
-    justify-content: space-between;
     align-items: center;
-    max-width: 7em;
 }
 
-.base article:only-child {
-    margin-left: auto;
+.btn-small {
+    background-color: var(--primary);
+    color: white;
+    border: none;
+    border-radius: 4px;
+    padding: 0.5em 1em;
+    cursor: pointer;
+    transition: background-color 0.2s;
 }
 
-img {
-    max-width: 150px;
-    max-height: 200px;
-    overflow: hidden;
+.btn-small:hover {
+    background-color: var(--secondary);
+}
+
+.button-error {
+    background-color: #e57373;
+}
+
+.button-error:hover {
+    background-color: #f44336;
+}
+
+p {
+    margin: 0;
 }
 </style>

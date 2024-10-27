@@ -12,8 +12,9 @@
 }
 
 .error {
-  background-color: #fa5252;
+  background-color: var(--accent);
 }
+
 .success {
-  background-color: #40c057;
+  background-color: var(--primary);
 }

@@ -8,7 +8,7 @@ const emit = defineEmits(["getPhotocardsByTag"]);
 <template>
     <form @submit.prevent="emit('getPhotocardsByTag', tags)" class="pure-form">
         <fieldset>
-            <input type="text" v-model="tags" placeholder="Search by tags..." />
+            <input type="text" v-model="tags" placeholder="Search photocards by tags..." />
             <button type="submit" class="pure-button pure-button-primary">Search</button>
         </fieldset>
     </form>

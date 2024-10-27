@@ -11,7 +11,6 @@ const userStore = useUserStore();
 const { isLoggedIn } = storeToRefs(userStore);
 const { toast } = storeToRefs(useToastStore());
 
-// Make sure to update the session before mounting the app in case the user is already logged in
 onBeforeMount(async () => {
   try {
     await userStore.updateSession();
@@ -22,18 +21,35 @@ onBeforeMount(async () => {
 </script>
 
 <template>
-  <header>
-    <nav>
-      <div class="title">
-        <img src="@/assets/images/logo.svg" />
+  <header class="navbar-header">
+    <nav class="navbar">
+      <div class="navbar-title">
+        <img src="@/assets/images/photo.png" alt="Pocanet logo" />
         <RouterLink :to="{ name: 'Home' }">
           <h1>Pocanet</h1>
         </RouterLink>
       </div>
-      <ul>
+      <ul class="navbar-links">
         <li>
           <RouterLink :to="{ name: 'View All Photocards' }"
-            :class="{ selected: currentRouteName == 'View All Photocards' }"> View All Photocards </RouterLink>
+            :class="{ selected: currentRouteName == 'View All Photocards' }">
+            View All Photocards
+          </RouterLink>
+        </li>
+        <li v-if="isLoggedIn">
+          <RouterLink :to="{ name: 'Discovery' }" :class="{ selected: currentRouteName == 'Discovery' }">
+            Discover A New Photocard
+          </RouterLink>
+        </li>
+        <li v-if="isLoggedIn">
+          <RouterLink :to="{ name: 'Messages' }" :class="{ selected: currentRouteName == 'Messages' }"> Messages
+          </RouterLink>
+        </li>
+        <li v-if="isLoggedIn">
+          <RouterLink :to="{ name: 'Profile', params: { username: userStore.currentUsername } }"
+            :class="{ selected: currentRouteName == 'Profile' }">
+            Profile
+          </RouterLink>
         </li>
         <li v-if="isLoggedIn">
           <RouterLink :to="{ name: 'Settings' }" :class="{ selected: currentRouteName == 'Settings' }"> Settings
@@ -42,20 +58,8 @@ onBeforeMount(async () => {
         <li v-else>
           <RouterLink :to="{ name: 'Login' }" :class="{ selected: currentRouteName == 'Login' }"> Login </RouterLink>
         </li>
-        <li v-if="isLoggedIn">
-          <RouterLink :to="{ name: 'Messages' }" :class="{ selected: currentRouteName == 'Messages' }"> Messages
-          </RouterLink>
-        </li>
-        <li v-if="isLoggedIn">
-          <RouterLink :to="{ name: 'Profile', params: { username: userStore.currentUsername } }"
-            :class="{ selected: currentRouteName == 'Profile' }"> Profile
-          </RouterLink>
-        </li>
       </ul>
     </nav>
-    <article v-if="toast !== null" class="toast" :class="toast.style">
-      <p>{{ toast.message }}</p>
-    </article>
   </header>
   <RouterView />
 </template>
@@ -63,68 +67,103 @@ onBeforeMount(async () => {
 <style scoped>
 @import "./assets/toast.css";
 
-nav {
-  padding: 0 .5em;
-  background-color: var(--background);
-  border-bottom: 3px solid var(--primary);
+.navbar-header {
+  background: #f9f9f9;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.navbar {
+  padding: 1em;
   display: flex;
   align-items: center;
-  margin: 0;
+  border-bottom: 3px solid var(--primary);
+  flex-wrap: wrap;
 }
 
-h1 {
-  font-size: 1.5em;
-  margin: 0;
-  padding: 0;
-}
-
-.title {
+.navbar-title {
   display: flex;
   align-items: center;
   gap: 0.5em;
-  margin: 0;
-  padding: 0;
 }
 
-img {
+.navbar-title img {
   height: 2em;
-  margin: 0;
-  padding: 0;
 }
 
-a {
-  font-size: large;
-  color: black;
+.navbar-title h1 {
+  font-size: 1.8em;
+  color: var(--primary);
+  font-weight: bold;
+  margin: 0;
+}
+
+.navbar-title a {
   text-decoration: none;
-  padding: .5em;
-  margin: 0;
-  min-height: 100%;
 }
 
-ul {
+.navbar-links {
   list-style-type: none;
   margin: 0 0 0 auto;
   padding: 0;
   display: flex;
   align-items: center;
-  flex-direction: row;
-  gap: 1em;
-  min-height: 100%;
+  gap: 1.2em;
 }
 
-li {
-  margin: 0;
+.navbar-links li {
   padding: 0;
-  min-height: 100%;
 }
 
-.selected {
+.navbar-links a {
+  font-size: large;
+  color: #333;
+  text-decoration: none;
+  padding: 0.5em 1em;
+  border-radius: 8px;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.navbar-links .selected {
   background-color: var(--primary);
-  min-height: 100%;
-
+  color: white;
 }
 
-a:hover {
+.navbar-links a:hover {
   background-color: var(--secondary);
+  color: white;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+/* Responsive styling */
+@media (max-width: 768px) {
+  .navbar {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .navbar-links {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .navbar-links li {
+    width: 100%;
+    text-align: center;
+  }
+
+  .navbar-links a {
+    width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .navbar-title h1 {
+    font-size: 1.4em;
+  }
+
+  .navbar-links a {
+    font-size: medium;
+    padding: 0.5em;
+  }
 }
 </style>

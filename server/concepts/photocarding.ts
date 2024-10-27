@@ -21,6 +21,14 @@ export default class PhotocardingConcept {
       this.photocards = new DocCollection<PhotocardDoc>(collectionName);
       void this.photocards.collection.createIndex({ tags: 1 });
     }
+
+    async getPhotocardById(_id: ObjectId) {
+        const photocard = await this.photocards.readOne({ _id });
+        if (!photocard) {
+            throw new PhotocardNotFoundError(_id);
+        }
+        return photocard;
+    }
     
     /**
      * Adding a new photocard to the system, defined by its tags.

@@ -92,6 +92,16 @@ export default class MessagingConcept {
         return { msg: "User unblocked!" };
     }
 
+    async isUserBlocked( user: ObjectId, recipient: ObjectId) {
+        try {
+            await this.assertIsBlocked(user, recipient);
+            return true;
+        }
+        catch (e) {
+            return false;
+        }
+    }
+
     private async assertNotBlocked(user: ObjectId, recipient: ObjectId) {
         const userBlockData = await this.blockData.readOne({ user });
         if (!userBlockData) {

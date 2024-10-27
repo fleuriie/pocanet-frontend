@@ -11,11 +11,18 @@
 
 button.btn-small {
   font-size: 80%;
+  color: black;
+  background: var(--secondary);
 }
 
 button.button-error {
   color: white;
-  background: var(--red);
+  background: var(--accent);
+}
+
+button.pure-button-primary {
+  color: black;
+  background: var(--secondary);
 }
 
 a.button {
@@ -38,5 +45,10 @@ a.button {
 body {
   background-color: var(--background);
   font-family: 'Inter', sans-serif;
+  height: 100%;
+  margin: auto;
+}
 
+html {
+  height: 100%
 }

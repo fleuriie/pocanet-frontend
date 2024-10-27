@@ -2,6 +2,7 @@ import { storeToRefs } from "pinia";
 import { createRouter, createWebHistory } from "vue-router";
 
 import { useUserStore } from "@/stores/user";
+import DiscoveryView from "../views/DiscoveryView.vue";
 import HomeView from "../views/HomeView.vue";
 import LoginView from "../views/LoginView.vue";
 import MessagesView from "../views/MessagesView.vue";
@@ -52,6 +53,12 @@ const router = createRouter({
       name: "Profile",
       component: ProfileView,
       meta: { requiresAuth: false },
+    },
+    {
+      path: "/discover",
+      name: "Discovery",
+      component: DiscoveryView,
+      meta: { requiresAuth: true },
     },
     {
       path: "/:catchAll(.*)",

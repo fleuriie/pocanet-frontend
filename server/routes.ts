@@ -111,6 +111,12 @@ class Routes {
     return await Photocarding.searchTags(tagList);
   }
 
+  // @Router.get("/photocard/:id")
+  // async getPhotocardById(id: string) {
+  //   const oid = new ObjectId(id);
+  //   return await Photocarding.getPhotocardById(oid);
+  // }
+
   /**
    * Adds a photocard to the currently active user's collection
    * 
@@ -125,7 +131,7 @@ class Routes {
     const dupe = await Photocarding.duplicatePhotocard(oid, `owner:${currentUsername[0]}`);
     await Photocarding.deleteTag(dupe.id, "System");
     await Cataloging.userAddItem(currentUsername[0], dupe.id);
-    return { msg: 'Photocard successfully added to collection!' };
+    return { msg: 'Photocard successfully added to collection!', id: dupe.id };
   }
 
   @Router.post("/catalog/edit/add/:photocard/:tag")
@@ -182,12 +188,13 @@ class Routes {
     await Discovering.createUserDiscovery(user);
     const recommended = await Discovering.recommend(user);
     const owner = await Authing.idsToUsernames([recommended.owner]);
-    const averageRating = await Reviewing.getAverageRating(owner[0])
+    const averageRating = await Reviewing.getAverageRating(owner[0]);
+    const recommendedPhotocard = await Photocarding.getPhotocardById(recommended.item);
     if(averageRating > 0 && averageRating < 3) {
-      return { msg: 'Photocard recommended, but the owner has a poor rating!', owner: owner[0], photocard: recommended.item };
+      return { msg: 'Poor rating!', owner: owner[0], photocard: recommendedPhotocard };
     }
     else {
-      return { msg: 'Photocard recommended!', owner: owner[0], photocard: recommended.item };
+      return { msg: 'Photocard recommended!', owner: owner[0], photocard: recommendedPhotocard };
     }
   }
 
@@ -216,17 +223,22 @@ class Routes {
   @Router.post("/message/block/:user")
   async blockUser(session: SessionDoc, user: string) {
     const from = Sessioning.getUser(session);
-    const toOid = await Authing.idsToUsernames([new ObjectId(user)]);
-    const toUser = new ObjectId(toOid[0]);
-    return await Messaging.blockUser(from, toUser);
+    const toOid = new ObjectId(user);
+    return await Messaging.blockUser(from, toOid);
   }
 
   @Router.post("/message/unblock/:user")
   async unblockUser(session: SessionDoc, user: string) {
     const from = Sessioning.getUser(session);
-    const toOid = await Authing.idsToUsernames([new ObjectId(user)]);
-    const toUser = new ObjectId(toOid[0]);
-    return await Messaging.unblockUser(from, toUser);
+    const toOid = new ObjectId(user);
+    return await Messaging.unblockUser(from, toOid);
+  }
+
+  @Router.get("/message/blocked/:user")
+  async isUserBlocked(session: SessionDoc, user: string) {
+    const currentUser = Sessioning.getUser(session);
+    const toOid = new ObjectId(user);
+    return await Messaging.isUserBlocked(currentUser, toOid);
   }
 
   @Router.get("/message/recent")

@@ -1,6 +1,6 @@
 import { ObjectId } from "mongodb";
 import DocCollection, { BaseDoc } from "../framework/doc";
-import { NotAllowedError } from "./errors";
+import { NotAllowedError, NotFoundError } from "./errors";
 
 export interface UserDiscoveryDoc extends BaseDoc {
     user: ObjectId;
@@ -48,8 +48,6 @@ export default class DiscoveringConcept {
         /**
          *  Returns a random item from the discoverList that the user has not seen yet and that they
          *  do not own. Updates the user's seen list to include the recommended item.
-         *  (will be updated with a more sophisticated recommendation algorithm, choosing random
-         *  items for proof of concept)
          *  @param user - the user to recommend an item to
          *  @returns the recommended item's ObjectId and owner's ObjectId
          */
@@ -60,9 +58,8 @@ export default class DiscoveringConcept {
         const seen = userDiscovery.seen;
         const recommendations = await this.discoverList.readMany({ item: { $nin: seen, $exists: true },
             owner: { $ne: user } });
-        console.log(recommendations);
         if (recommendations.length === 0) {
-            throw new NotAllowedError("No recommendations available!");
+            throw new NoRecommendationsError();
         }
         else {
             const randomIndex = Math.floor(Math.random() * recommendations.length);
@@ -72,4 +69,9 @@ export default class DiscoveringConcept {
         }
     }
   }
-  
+  export class NoRecommendationsError extends NotFoundError {
+    constructor(
+    ) {
+        super(`No more recommendations available!`);
+    }
+}
